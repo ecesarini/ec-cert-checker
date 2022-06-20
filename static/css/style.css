@@ -1,0 +1,9 @@
+#cert-table {
+	width: 70vw;
+}
+
+#status-row > th:hover {
+	cursor: pointer;
+	background-color: cyan;
+	color: blue;
+}

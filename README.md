@@ -1,71 +1,46 @@
-# jota-cert-checker
+# Certificate Monitor
 
-## Description
+Monitoraggio dei certificati per i _Servizi Nazionali_.
 
-A script to check SSL certificate expiration date of a list of sites.
+Fork del progetto [Jota Cert Checker](https://github.com/juliojsb/jota-cert-checker).
 
-The script can be launched in two modes:
 
-* **Terminal**: Output is displayed in your terminal
-* **HTML**: the script generates an HTML file (called **certs_check.html** by default) that can be opened with your browser. 
+## Descrizione
 
-Optionally, you can also embed the HTML and send it via:
+Lo script permette di generare una pagina html contente una lista di server con lo stato e il tempo di validità dei relativi certificati. 
 
-* **email**: you will need to install **mutt** if you use this option
-* **slack**: install **imgkit** via pip and **wkhtmltopdf** using your distribution package manager (in RHEL/CentOS you will need to enable EPEL first) Don't forget to configure you Slack Token the **slack_token** variable of jota-cert-checker.sh script
+## Utilizzo
 
-## Usage
-
-For example, we have the following file called sitelist that contains a list of domains with the HTTPS port, one domain per line:
-
-```
-linux.com:443
-kernel.org:443
-gnu.org:443
-debian.org:443
-ubuntu.com:443
-github.com:443
-google.es:443
-redhat.com:443
-superuser.com:443
-youtube.com:443
-stackoverflow.com:443
-stackexchange.com:443
-wikipedia.org:443
-python.org:443
-codecademy.com:443
-packtpub.com:443
-reddit.com:443
-mysql.com:443
-```
-
-In the following cases I modified the variables **warning_days** and **alert_days** for sample purposes. 
-
-To launch the script in terminal mode:
+Clonare il progetto in una cartella locale: (e.g ```/var/www/jcc```) e rendere accessibile la cartella tramite _web server_.
+Popolare il file ```domains``` con i server desiderati secondo la sintassi `fqdn:port`.
 ```bash
-./jota-cert-checker.sh -f sitelist -o terminal
+server01.example.it:443
+server02.example.it:993
+...
 ```
-We get the following output in our terminal:
+> :warning: la porta è **obbligatoria** anche se si tratta della 443.
 
-![screenshot from 2018-02-11 20-33-06](https://user-images.githubusercontent.com/12804701/36077449-5f85d338-0f6b-11e8-991d-1ffef916d4b6.png)
-
-In HTML mode:
+Eseguendo il comando:
 ```bash
-./jota-cert-checker.sh -f sitelist -o html
+$ ./jota-cert-checker -f domains -o html
 ```
-We get the following output:
-
-![screenshot from 2018-02-11 20-29-44](https://user-images.githubusercontent.com/12804701/36077452-6c282e4c-0f6b-11e8-966b-f3d863298586.png)
-
-In HTML mode and sending the result to an email:
+Verrà generato il file `index.html` contente il markup con la lista di server aggiornata.
+È anche possibile avere i risultati direttamente da terminale
 ```bash
-./jota-cert-checker.sh -f sitelist -o html -m mail@example.com
+$ ./jota-cert-checker -f domains -o terminal
 ```
-Checking our email we will see:
+Per automatizzare il processo e' stato creato lo script `run-certs.sh` che esegue i seguenti passi:
+- Rimuove il contenuto della cartella mailing.
+- Crea il file `mailing/output.txt` contenente l'output dalla lista server con lo stato aggiornato.
+- Crea il file `mailing/list.txt` contente la lista di server con stato del certificato da tenere sotto controllo (_alert_<30gg; _expired_)
+- Manda una mail contente la lista dei server del punto precedente.
 
-![screenshot from 2018-02-11 20-30-11](https://user-images.githubusercontent.com/12804701/36078161-891bb566-0f73-11e8-984c-1cd65127a8e4.png)
-
-Also in HTML mode and sending the result to a slack channel:
+Per automatizzare il controllo sarebbe opportuno creare un _cronjob_, e.g.
 ```bash
-./jota-cert-checker.sh -f sitelist -o html -s my_slack_channel
+0 5 * * * /var/www/jcc/run-certs.sh
 ```
+
+## Sviluppo
+Nella cartella `static` sono presenti i riferimenti per la customizzazione dello stile e js.
+
+

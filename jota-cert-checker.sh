@@ -17,14 +17,14 @@ script_path=$(dirname $(realpath -s $0))
 sites_list="$1"
 timeout="5"
 sitename="${sitename:-}"
-html_file="${html_file:-certs_check.html}"
+html_file="${html_file:-index.html}"
 img_file="${img_file:-certs_check.jpg}"
 current_date=$(date +%s)
 end_date="${end_date:-}"
 days_left="${days_left:-}"
 certificate_last_day="${certificate_last_day:-}"
-warning_days="${warning_days:-300}"
-alert_days="${alert_days:-150}"
+warning_days="${warning_days:-180}"
+alert_days="${alert_days:-30}"
 # Terminal colors
 ok_color="\e[38;5;40m"
 warning_color="\e[38;5;220m"
@@ -46,16 +46,17 @@ html_mode(){
 	<html>
 			<head>
 			<title>SSL Certs expiration</title>
+			<link href="static/css/style.css" rel="stylesheet">
 			</head>
 			<body style="background-color: lightblue;">
 					<h1 style="color: navy;text-align: center;font-family: 'Helvetica Neue', sans-serif;font-size: 20px;font-weight: bold;">SSL Certs expiration checker</h1>
-					<a href="https://github.com/juliojsb/jota-cert-checker" style="position: absolute; top: 0; right: 0px"><img loading="lazy" width="100" height="100" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_darkblue_121621.png?resize=100%2C100" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1"></a>
-					<table style="background-color: #C5E1E7;padding: 10px;box-shadow: 5px 10px 18px #888888;margin-left: auto ;margin-right: auto ;border: 1px solid black;">
-					<tr style="padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;">
-					<th style="padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;font-weight: bold;">Site</th>
-					<th style="padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;font-weight: bold;">Expiration date</th>
-					<th style="padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;font-weight: bold;">Days left</th>
-					<th style="padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;font-weight: bold;">Status</th>
+					<!--<a href="https://github.com/juliojsb/jota-cert-checker" style="position: absolute; top: 0; right: 0px"><img loading="lazy" width="100" height="100" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_darkblue_121621.png?resize=100%2C100" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1"></a>-->
+					<table id="cert-table" style="background-color: #C5E1E7;padding: 10px;box-shadow: 5px 10px 18px #888888;margin-left: auto ;margin-right: auto ;border: 1px solid black;">
+					<tr id="status-row" style="padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;">
+					<th class="domain" style="padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;font-weight: bold;">Site</th>
+					<th class="date" style="padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;font-weight: bold;">Expiration date</th>
+					<th class="days" style="padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;font-weight: bold;">Days left</th>
+					<th class="status" style="padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;font-weight: bold;">Status</th>
 					</tr>
 	EOF
 
@@ -70,42 +71,42 @@ html_mode(){
 
 			if [ "$days_left" -gt "$warning_days" ];then
 				echo "<tr style=\"padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;\">" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #33FF4F;\">${sitename}</td>" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #33FF4F;\">${certificate_last_day}</td>" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #33FF4F;\">${days_left}</td>" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #33FF4F;\">Ok</td>" >> $html_file
+				echo "<td class="domain" style=\"padding: 8px;background-color: #33FF4F;\">${sitename}</td>" >> $html_file
+				echo "<td class="date" style=\"padding: 8px;background-color: #33FF4F;\">${certificate_last_day}</td>" >> $html_file
+				echo "<td class="days" style=\"padding: 8px;background-color: #33FF4F;\">${days_left}</td>" >> $html_file
+				echo "<td class="status" style=\"padding: 8px;background-color: #33FF4F;\">Ok</td>" >> $html_file
 				echo "</tr>" >> $html_file
 
 			elif [ "$days_left" -le "$warning_days" ] && [ "$days_left" -gt "$alert_days" ];then
 				echo "<tr style=\"padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;\">" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #FFE032;\">${sitename}</td>" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #FFE032;\">${certificate_last_day}</td>" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #FFE032;\">${days_left}</td>" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #FFE032;\">Warning</td>" >> $html_file
+				echo "<td class="domain" style=\"padding: 8px;background-color: #FFE032;\">${sitename}</td>" >> $html_file
+				echo "<td class="date" style=\"padding: 8px;background-color: #FFE032;\">${certificate_last_day}</td>" >> $html_file
+				echo "<td class="days" style=\"padding: 8px;background-color: #FFE032;\">${days_left}</td>" >> $html_file
+				echo "<td class="status" style=\"padding: 8px;background-color: #FFE032;\">Warning</td>" >> $html_file
 				echo "</tr>" >> $html_file
 
 			elif [ "$days_left" -le "$alert_days" ] && [ "$days_left" -gt 0 ];then
 				echo "<tr style=\"padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;\">" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #FF8F32;\">${sitename}</td>" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #FF8F32;\">${certificate_last_day}</td>" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #FF8F32;\">${days_left}</td>" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #FF8F32;\">Alert</td>" >> $html_file
+				echo "<td class="domain" style=\"padding: 8px;background-color: #FF8F32;\">${sitename}</td>" >> $html_file
+				echo "<td class="date" style=\"padding: 8px;background-color: #FF8F32;\">${certificate_last_day}</td>" >> $html_file
+				echo "<td class="days" style=\"padding: 8px;background-color: #FF8F32;\">${days_left}</td>" >> $html_file
+				echo "<td class="status" style=\"padding: 8px;background-color: #FF8F32;\">Alert</td>" >> $html_file
 				echo "</tr>" >> $html_file
 
 			elif [ "$days_left" -le 0 ];then
 				echo "<tr style=\"padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;\">" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #EF3434;\">${sitename}</td>" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #EF3434;\">${certificate_last_day}</td>" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #EF3434;\">${days_left}</td>" >> $html_file
-				echo "<td style=\"padding: 8px;background-color: #EF3434;\">Expired</td>" >> $html_file
+				echo "<td class="domain" style=\"padding: 8px;background-color: #EF3434;\">${sitename}</td>" >> $html_file
+				echo "<td class="date" style=\"padding: 8px;background-color: #EF3434;\">${certificate_last_day}</td>" >> $html_file
+				echo "<td class="days" style=\"padding: 8px;background-color: #EF3434;\">${days_left}</td>" >> $html_file
+				echo "<td class="status" style=\"padding: 8px;background-color: #EF3434;\">Expired</td>" >> $html_file
 				echo "</tr>" >> $html_file
 			fi
 		else
 			echo "<tr style=\"padding: 8px;text-align: left;font-family: 'Helvetica Neue', sans-serif;\">" >> $html_file
-			echo "<td style=\"padding: 8px;background-color: #999493;\">${sitename}</td>" >> $html_file
-			echo "<td style=\"padding: 8px;background-color: #999493;\">n/a</td>" >> $html_file
-			echo "<td style=\"padding: 8px;background-color: #999493;\">n/a</td>" >> $html_file
-			echo "<td style=\"padding: 8px;background-color: #999493;\">Unknown</td>" >> $html_file
+			echo "<td class="domain" style=\"padding: 8px;background-color: #999493;\">${sitename}</td>" >> $html_file
+			echo "<td class="date" style=\"padding: 8px;background-color: #999493;\">n/a</td>" >> $html_file
+			echo "<td class="days" style=\"padding: 8px;background-color: #999493;\">n/a</td>" >> $html_file
+			echo "<td class="status" style=\"padding: 8px;background-color: #999493;\">Unknown</td>" >> $html_file
 			echo "</tr>" >> $html_file
 		fi
 	done < ${sites_list}
@@ -113,6 +114,7 @@ html_mode(){
 	# Close main HTML tags
 	cat <<- EOF >> $html_file
 			</table>
+			<script type="module" src="static/js/ecc.js"></script>
 			</body>
 	</html>
 	EOF
