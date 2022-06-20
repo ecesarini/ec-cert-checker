@@ -1,6 +1,6 @@
 # Certificate Monitor
 
-Monitoraggio dei certificati per i _Servizi Nazionali_.
+Monitoraggio dei certificati, dashboard e notifica.
 
 Fork del progetto [Jota Cert Checker](https://github.com/juliojsb/jota-cert-checker).
 
